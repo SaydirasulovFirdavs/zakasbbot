@@ -1,0 +1,26 @@
+services:
+  # 1. Telegram Bot (Backend)
+  - type: web
+    name: zakasb-bot
+    env: node
+    plan: free
+    region: frankfurt
+    buildCommand: cd bot && npm install
+    startCommand: cd bot && node index.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: BOT_TOKEN
+        sync: false # Siz buni Render panelida o'zingiz kiritasiz
+      - key: WEB_APP_URL
+        sync: false # Buni frontend tayyor bo'lganda kiritasiz
+
+  # 2. Mini App Frontend (Static Site)
+  - type: static
+    name: zakasb-app
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    publishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Buni bot tayyor bo'lganda kiritasiz
