@@ -37,14 +37,24 @@ function validateTelegramData(initData, botToken) {
     return calculatedHash === hash;
 }
 
+// Health Check
+app.get('/', (req, res) => {
+    res.send('Bakery Bot API is running! 🥖');
+});
+
 bot.start((ctx) => {
-    ctx.replyWithHTML(
-        `<b>Xush kelibsiz, ${ctx.from.first_name}!</b> 🍰☕️\n\n` +
-        `Bu yerdan siz eng mazali pishiriqlarni buyurtma qilishingiz mumkin. Mini-ilovamiz orqali menyuni ko'rish uchun pastdagi tugmani bosing:`,
-        Markup.inlineKeyboard([
-            [Markup.button.webApp("🛒 Menu & Buyurtma", WEB_APP_URL)]
-        ])
-    );
+    console.log(`Received /start from ${ctx.from.id}`);
+    try {
+        ctx.replyWithHTML(
+            `<b>Xush kelibsiz, ${ctx.from.first_name}!</b> 🍰☕️\n\n` +
+            `Bu yerdan siz eng mazali pishiriqlarni buyurtma qilishingiz mumkin. Mini-ilovamiz orqali menyuni ko'rish uchun pastdagi tugmani bosing:`,
+            Markup.inlineKeyboard([
+                [Markup.button.webApp("🛒 Menu & Buyurtma", WEB_APP_URL)]
+            ])
+        ).catch(err => console.error('Reply error:', err));
+    } catch (e) {
+        console.error('Start command error:', e);
+    }
 });
 
 // API Endpoint for orders
@@ -54,6 +64,7 @@ app.post('/api/order', async (req, res) => {
         
         // Security Check
         if (!validateTelegramData(initData, process.env.BOT_TOKEN)) {
+            console.warn('Security check failed for order');
             return res.status(403).json({ error: 'Xavfsizlik tekshiruvidan o\'tilmadi' });
         }
 
@@ -84,7 +95,7 @@ app.post('/api/order', async (req, res) => {
         await bot.telegram.sendMessage(chat_id, orderSummary, { parse_mode: 'HTML' });
         await bot.telegram.sendMessage(chat_id, isUz ? '✅ Buyurtmangiz qabul qilindi! Holatni shu yerda kuzatib borishingiz mumkin.' : '✅ Ваш заказ принят! Вы можете следить за статусом здесь.');
 
-        // Simulate Status Updates (Professional touch)
+        // Simulate Status Updates
         setTimeout(() => {
             bot.telegram.sendMessage(chat_id, isUz ? '👨‍🍳 Buyurtmangiz tayyorlanmoqda...' : '👨‍🍳 Ваш заказ готовится...');
         }, 10000);
@@ -101,13 +112,19 @@ app.post('/api/order', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ API Server running on port ${PORT}`);
 });
 
-bot.launch();
+bot.catch((err, ctx) => {
+    console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+});
+
+bot.launch().then(() => {
+    console.log('🚀 Bot successfully launched!');
+}).catch(err => {
+    console.error('Bot launch failed:', err);
+});
+
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
-console.log('🚀 Bot ishga tushdi...');
-
-
