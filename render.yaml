@@ -18,7 +18,6 @@ services:
   # 2. Mini App Frontend (Static Site)
   - type: static_site
     name: zakasb-app
-    env: static
     buildCommand: cd client && npm install && npm run build
     publishPath: client/dist
     envVars:
