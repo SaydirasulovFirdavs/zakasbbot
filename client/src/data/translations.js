@@ -1,0 +1,100 @@
+export const translations = {
+  uz: {
+    shop: "Do'kon",
+    daily_fresh: "Yangi mahsulotlar har kuni",
+    categories: {
+      all: "Hammasi",
+      bread: "Non",
+      sweets: "Shirinliklar",
+      bogirsoq: "Bo'g'irsoq"
+    },
+    cart: {
+      title: "Savatcha",
+      empty: "Savatcha bo'sh",
+      total: "Jami:",
+      checkout: "Buyurtma berish",
+      name: "Ismingiz",
+      phone: "Telefon",
+      address: "Manzil",
+      payment_method: "To'lov turi",
+      cash: "Naqd pul",
+      card: "Karta (Payme/Click)",
+      use_bonuses: "Bonuslardan foydalanish",
+      bonus_balance: "Bonus balansi:",
+      order_success: "Buyurtma qabul qilindi!",
+      thanks: "Xaridingiz uchun rahmat!",
+      discount: "Keshbek:",
+      checkout_total: "To'lov:",
+      checkout_error: "Iltimos, barcha ma'lumotlarni to'ldiring",
+      error: "Xatolik",
+      name_placeholder: "Ismingizni kiriting",
+      address_placeholder: "Mahalla, ko'cha, uy...",
+      empty_title: "Savatchangiz bo'sh",
+      go_to_menu: "Menyuga qaytish",
+      free_delivery_reach: "Bepul yetkazib berish uchun yana",
+      free_delivery_ready: "Siz uchun yetkazib berish bepul!",
+      need_more: "Yana nimadir kerakmi?",
+      details_title: "Tarkibi va xususiyatlari",
+      details_desc: "Yangi pishirilgan mahsulot, eng sifatli masalliqlardan foydalanilgan. Hech qanday konservantlarsiz.",
+      ready_btn: "Tayyor"
+    },
+    search: "Qidiruv...",
+    profile: {
+      title: "Profil",
+      cashback: "Keshbek balansi",
+      orders: "Buyurtmalarim",
+      personal_info: "Shaxsiy ma'lumotlar",
+      save: "Saqlash",
+      logout: "Chiqish"
+    }
+  },
+  ru: {
+    shop: "Магазин",
+    daily_fresh: "Свежие продукты каждый день",
+    categories: {
+      all: "Все",
+      bread: "Хлеб",
+      sweets: "Сладости",
+      bogirsoq: "Богирсок"
+    },
+    cart: {
+      title: "Корзина",
+      empty: "Корзина пуста",
+      total: "Итого:",
+      checkout: "Оформить заказ",
+      name: "Ваше имя",
+      phone: "Телефон",
+      address: "Адрес",
+      payment_method: "Способ оплаты",
+      cash: "Наличные",
+      card: "Карта (Payme/Click)",
+      use_bonuses: "Использовать бонусы",
+      bonus_balance: "Бонусный баланс:",
+      order_success: "Заказ принят!",
+      thanks: "Спасибо за покупку!",
+      discount: "Кэшбэк:",
+      checkout_total: "К оплате:",
+      checkout_error: "Пожалуйста, заполните все данные",
+      error: "Ошибка",
+      name_placeholder: "Введите ваше имя",
+      address_placeholder: "Махалля, улица, дом...",
+      empty_title: "Ваша корзина пуста",
+      go_to_menu: "Вернуться в меню",
+      free_delivery_reach: "До бесплатной доставки еще",
+      free_delivery_ready: "Для вас доставка бесплатна!",
+      need_more: "Нужно что-то еще?",
+      details_title: "Состав и свойства",
+      details_desc: "Свежеиспеченный продукт, использованы лучшие ингредиенты. Без консервантов.",
+      ready_btn: "Готово"
+    },
+    search: "Поиск...",
+    profile: {
+      title: "Профиль",
+      cashback: "Баланс кэшбэка",
+      orders: "Мои заказы",
+      personal_info: "Личные данные",
+      save: "Сохранить",
+      logout: "Выйти"
+    }
+  }
+};
