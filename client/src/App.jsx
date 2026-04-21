@@ -245,6 +245,27 @@ function AdminDashboard({ t, lang, onBack, products, categories, stats, orders, 
                   <div className="form-group"><label>{t.admin.price}</label><input className="form-input" type="number" placeholder="8000" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseInt(e.target.value)})} /></div>
                   
                   <div className="form-group">
+                    <label>Tarkibi va xususiyatlari (UZ)</label>
+                    <textarea 
+                      className="form-input" 
+                      style={{ height: '80px', paddingTop: '12px' }} 
+                      placeholder="Masalan: Muzdek va shirin..." 
+                      value={newProduct.desc_uz} 
+                      onChange={e => setNewProduct({...newProduct, desc_uz: e.target.value})} 
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Tarkibi va xususiyatlari (RU)</label>
+                    <textarea 
+                      className="form-input" 
+                      style={{ height: '80px', paddingTop: '12px' }} 
+                      placeholder="Например: Холодная и сладкая..." 
+                      value={newProduct.desc_ru} 
+                      onChange={e => setNewProduct({...newProduct, desc_ru: e.target.value})} 
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label>{t.admin.image_url} (Galereyadan tanlang)</label>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                       <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="file-upload" />
