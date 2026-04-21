@@ -101,52 +101,14 @@ function MapSelector({ onLocationSelect, initialLocation, t, lang }) {
 }
 
 // Admin Dashboard Component
-function AdminDashboard({ t, lang, onBack }) {
-  const [stats, setStats] = useState({ totalUsers: 0, totalOrders: 0, totalRevenue: 0 });
-  const [orders, setOrders] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+function AdminDashboard({ t, lang, onBack, products, categories, stats, orders, users, loading, fetchData }) {
   const [activeTab, setActiveTab] = useState('stats');
-  const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingCat, setIsAddingCat] = useState(false);
   const [newCat, setNewCat] = useState({ id: '', uz: '', ru: '' });
-  const [newProduct, setNewProduct] = useState({ name_uz: '', name_ru: '', price: '', category: 'bread', image: '', desc_uz: '', desc_ru: '' });
+  const [newProduct, setNewProduct] = useState({ name_uz: '', name_ru: '', price: '', category: categories[0]?.id || 'bread', image: '', desc_uz: '', desc_ru: '' });
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [sRes, oRes, uRes, pRes, cRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/stats`),
-        fetch(`${API_URL}/api/admin/orders`),
-        fetch(`${API_URL}/api/admin/users`),
-        fetch(`${API_URL}/api/products`),
-        fetch(`${API_URL}/api/categories`)
-      ]);
-      
-      if (!sRes.ok || !oRes.ok || !uRes.ok || !pRes.ok || !cRes.ok) {
-        throw new Error("Server error");
-      }
-
-      setStats(await sRes.json());
-      setOrders(await oRes.json());
-      setUsers(await uRes.json());
-      setProducts(await pRes.json());
-      setCategories(await cRes.json());
-    } catch (err) {
-      console.error("Admin fetch error:", err);
-      // Fallback empty arrays to prevent white screen
-      setOrders([]);
-      setUsers([]);
-      setProducts([]);
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -173,39 +135,6 @@ function AdminDashboard({ t, lang, onBack }) {
         fetchData();
       }
     } catch (err) { alert(err.message); }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    if (!newProduct.name_uz || !newProduct.price || !newProduct.image) {
-      alert("Iltimos, nomi, narxi va rasmini kiriting!");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_URL}/api/admin/products`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct)
-      });
-      
-      const result = await res.json();
-      
-      if (res.ok) {
-        setIsAdding(false);
-        setNewProduct({ name_uz: '', name_ru: '', price: '', category: categories[0]?.id || 'bread', image: '', desc_uz: '', desc_ru: '' });
-        fetchData();
-        alert("Mahsulot muvaffaqiyatli qo'shildi! ✅");
-      } else {
-        alert("Server xatosi: " + (result.error || "Noma'lum xatolik"));
-      }
-    } catch (err) {
-      alert("Aloqa xatosi: " + err.message);
-    }
   };
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', fontWeight: '700' }}>{t.admin.loading}</div>;
@@ -357,30 +286,37 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [stats, setStats] = useState({ totalUsers: 0, totalOrders: 0, totalRevenue: 0 });
+  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [useBonuses, setUseBonuses] = useState(false);
-  const [location, setLocation] = useState({ lat: 41.311, lng: 69.240 });
-  
-  const [userDetails, setUserDetails] = useState(() => {
-    const savedDetails = localStorage.getItem('userDetails');
-    return savedDetails ? JSON.parse(savedDetails) : { name: '', phone: '', address: '' };
-  });
-
-  const FREE_DELIVERY_THRESHOLD = 50000;
-  const [webapp, setWebapp] = useState(null);
-  const [cashbackBalance, setCashbackBalance] = useState(25000); 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [sRes, oRes, uRes, pRes, cRes] = await Promise.all([
+        fetch(`${API_URL}/api/admin/stats`),
+        fetch(`${API_URL}/api/admin/orders`),
+        fetch(`${API_URL}/api/admin/users`),
+        fetch(`${API_URL}/api/products`),
+        fetch(`${API_URL}/api/categories`)
+      ]);
+      
+      if (sRes.ok) setStats(await sRes.json());
+      if (oRes.ok) setOrders(await oRes.json());
+      if (uRes.ok) setUsers(await uRes.json());
+      if (pRes.ok) setProducts(await pRes.json());
+      if (cRes.ok) setCategories(await cRes.json());
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (window.Telegram && window.Telegram.WebApp) {
@@ -389,28 +325,12 @@ function App() {
       wa.expand();
       setWebapp(wa);
       
-      // Secret Admin Access: If username is your admin username or ID
-      // For now, let's add a long press or specific user ID
-      const adminIds = [8793808077, 12345678, 6214470213]; // Add your Telegram ID here
+      const adminIds = [8793808077, 12345678, 6214470213];
       if (wa.initDataUnsafe?.user && adminIds.includes(wa.initDataUnsafe.user.id)) {
         // Option to switch to admin
       }
     }
-
-    const fetchInitialData = async () => {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const [pRes, cRes] = await Promise.all([
-          fetch(`${API_URL}/api/products`),
-          fetch(`${API_URL}/api/categories`)
-        ]);
-        if (pRes.ok) setProducts(await pRes.json());
-        if (cRes.ok) setCategories(await cRes.json());
-      } catch (err) {
-        console.error("Initial fetch error:", err);
-      }
-    };
-    fetchInitialData();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -520,7 +440,18 @@ function App() {
   }
 
   if (isAdmin) {
-    return <AdminDashboard t={t} lang={lang} onBack={() => setIsAdmin(false)} />;
+    return <AdminDashboard 
+      t={t} 
+      lang={lang} 
+      onBack={() => setIsAdmin(false)} 
+      products={products}
+      categories={categories}
+      stats={stats}
+      orders={orders}
+      users={users}
+      loading={loading}
+      fetchData={fetchData}
+    />;
   }
 
   return (
@@ -601,9 +532,9 @@ function App() {
                         />
                         {qty > 0 ? (
                           <div className="qty-control-abs" onClick={(e) => e.stopPropagation()}>
-                            <button className="qty-btn-mini" onClick={() => updateQuantity(product.id, -1)}><Minus size={14} /></button>
+                            <button className="qty-btn-mini" onClick={() => updateQuantity(product.id, -1, product)}><Minus size={14} /></button>
                             <span style={{ fontSize: '13px', fontWeight: '800' }}>{qty}</span>
-                            <button className="qty-btn-mini" onClick={() => updateQuantity(product.id, 1)}><Plus size={14} /></button>
+                            <button className="qty-btn-mini" onClick={() => updateQuantity(product.id, 1, product)}><Plus size={14} /></button>
                           </div>
                         ) : (
                           <button className="add-btn-abs" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>
@@ -612,9 +543,9 @@ function App() {
                         )}
                       </div>
                       <div className="card-body">
-                        <div className="card-price">{product.price.toLocaleString()}</div>
+                        <div className="card-price">{product.price?.toLocaleString()}</div>
                         <h3>{product[`name_${lang}`]}</h3>
-                        <p className="desc">{product[`desc_${lang}`]}</p>
+                        <p className="desc">{product[`desc_${lang}`] || 'Sifatli va mazali'}</p>
                       </div>
                     </motion.div>
                   );
