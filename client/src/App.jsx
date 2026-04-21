@@ -292,7 +292,32 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
+  const [cart, setCart] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (e) { return []; }
+  });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [useBonuses, setUseBonuses] = useState(false);
+  const [location, setLocation] = useState({ lat: 41.311, lng: 69.240 });
+  const [webapp, setWebapp] = useState(null);
+  const [cashbackBalance, setCashbackBalance] = useState(25000);
+
+  const [userDetails, setUserDetails] = useState(() => {
+    try {
+      const savedDetails = localStorage.getItem('userDetails');
+      return savedDetails ? JSON.parse(savedDetails) : { name: '', phone: '', address: '' };
+    } catch (e) { return { name: '', phone: '', address: '' }; }
+  });
+
+  const FREE_DELIVERY_THRESHOLD = 50000;
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   const fetchData = async () => {
