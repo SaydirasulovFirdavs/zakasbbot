@@ -124,6 +124,11 @@ function AdminDashboard({ t, lang, onBack }) {
         fetch(`${API_URL}/api/products`),
         fetch(`${API_URL}/api/categories`)
       ]);
+      
+      if (!sRes.ok || !oRes.ok || !uRes.ok || !pRes.ok || !cRes.ok) {
+        throw new Error("Server error");
+      }
+
       setStats(await sRes.json());
       setOrders(await oRes.json());
       setUsers(await uRes.json());
@@ -131,6 +136,11 @@ function AdminDashboard({ t, lang, onBack }) {
       setCategories(await cRes.json());
     } catch (err) {
       console.error("Admin fetch error:", err);
+      // Fallback empty arrays to prevent white screen
+      setOrders([]);
+      setUsers([]);
+      setProducts([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
