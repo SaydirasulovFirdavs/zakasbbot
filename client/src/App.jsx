@@ -108,30 +108,53 @@ function AdminDashboard({ t, lang, onBack }) {
   const [products, setProducts] = useState([]);
   const [activeTab, setActiveTab] = useState('stats');
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name_uz: '', name_ru: '', price: '', category: 'bread', image: '', desc_uz: '', desc_ru: '' });
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [sRes, oRes, uRes, pRes] = await Promise.all([
+        fetch(`${API_URL}/api/admin/stats`),
+        fetch(`${API_URL}/api/admin/orders`),
+        fetch(`${API_URL}/api/admin/users`),
+        fetch(`${API_URL}/api/products`)
+      ]);
+      setStats(await sRes.json());
+      setOrders(await oRes.json());
+      setUsers(await uRes.json());
+      setProducts(await pRes.json());
+    } catch (err) {
+      console.error("Admin fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [sRes, oRes, uRes, pRes] = await Promise.all([
-          fetch(`${API_URL}/api/admin/stats`),
-          fetch(`${API_URL}/api/admin/orders`),
-          fetch(`${API_URL}/api/admin/users`),
-          fetch(`${API_URL}/api/products`)
-        ]);
-        setStats(await sRes.json());
-        setOrders(await oRes.json());
-        setUsers(await uRes.json());
-        setProducts(await pRes.json());
-      } catch (err) {
-        console.error("Admin fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/api/admin/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
+      });
+      if (res.ok) {
+        setIsAdding(false);
+        setNewProduct({ name_uz: '', name_ru: '', price: '', category: 'bread', image: '', desc_uz: '', desc_ru: '' });
+        fetchData();
+        alert("Mahsulot qo'shildi!");
+      }
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
+  };
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Yuklanmoqda...</div>;
 
@@ -183,15 +206,50 @@ function AdminDashboard({ t, lang, onBack }) {
 
       {activeTab === 'products' && (
         <div>
-          <button className="btn-primary" style={{ marginBottom: '16px' }}>+ Yangi qo'shish</button>
+          <button onClick={() => setIsAdding(!isAdding)} className="btn-primary" style={{ marginBottom: '16px' }}>
+            {isAdding ? 'Bekor qilish' : '+ Yangi qo\'shish'}
+          </button>
+
+          {isAdding && (
+            <div style={{ background: 'white', padding: '20px', borderRadius: '24px', marginBottom: '24px', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }}>
+              <h4 style={{ marginBottom: '16px' }}>Yangi mahsulot</h4>
+              <div className="form-group"><input className="form-input" placeholder="Nomi (UZ)" value={newProduct.name_uz} onChange={e => setNewProduct({...newProduct, name_uz: e.target.value})} /></div>
+              <div className="form-group"><input className="form-input" placeholder="Nomi (RU)" value={newProduct.name_ru} onChange={e => setNewProduct({...newProduct, name_ru: e.target.value})} /></div>
+              <div className="form-group"><input className="form-input" type="number" placeholder="Narxi" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseInt(e.target.value)})} /></div>
+              <div className="form-group"><input className="form-input" placeholder="Rasm linki (URL)" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} /></div>
+              <div className="form-group">
+                <select className="form-input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
+                  <option value="bread">Non</option>
+                  <option value="sweets">Shirinlik</option>
+                  <option value="bogirsoq">Bo'g'irsoq</option>
+                </select>
+              </div>
+              <button onClick={handleAddProduct} className="btn-yandex">Saqlash</button>
+            </div>
+          )}
+
           {products.map(p => (
             <div key={p.id} style={{ display: 'flex', gap: '12px', background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '10px' }}>
-              <img src={p.image} style={{ width: '50px', height: '50px', borderRadius: '10px', objectFit: 'cover' }} />
+              <img src={p.image} style={{ width: '50px', height: '50px', borderRadius: '10px', objectFit: 'cover' }} onError={e => e.target.src='https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400'} />
               <div style={{ flex: 1 }}>
                 <p style={{ fontWeight: '700', fontSize: '14px' }}>{p[`name_${lang}`]}</p>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.price.toLocaleString()} so'm</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.price?.toLocaleString()} so'm</p>
               </div>
-              <button className="qty-btn-mini"><Plus size={16} /></button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div>
+          {users.map(u => (
+            <div key={u.telegram_id} style={{ background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{u.first_name[0]}</div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: '700', fontSize: '14px' }}>{u.first_name} {u.last_name || ''}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>@{u.username || 'n/a'}</p>
+              </div>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(u.created_at).toLocaleDateString()}</span>
             </div>
           ))}
         </div>
