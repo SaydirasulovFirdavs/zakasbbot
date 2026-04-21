@@ -60,7 +60,7 @@ bot.start((ctx) => {
 // API Endpoint for orders
 app.post('/api/order', async (req, res) => {
     try {
-        const { items, subTotal, discount, totalPrice, paymentMethod, user, initData, lang } = req.body;
+        const { items, subTotal, discount, totalPrice, paymentMethod, user, initData, lang, locationLink } = req.body;
         
         // Security Check
         if (!validateTelegramData(initData, process.env.MY_NEW_BOT_TOKEN)) {
@@ -78,6 +78,9 @@ app.post('/api/order', async (req, res) => {
         orderSummary += `<b>👤 ${isUz ? 'Mijoz' : 'Клиент'}:</b> ${user.name}\n`;
         orderSummary += `<b>📞 ${isUz ? 'Tel' : 'Тел'}:</b> ${user.phone}\n`;
         orderSummary += `<b>📍 ${isUz ? 'Manzil' : 'Адрес'}:</b> ${user.address}\n`;
+        if (locationLink) {
+            orderSummary += `<b>🗺 ${isUz ? 'Xarita' : 'Карта'}:</b> <a href="${locationLink}">${isUz ? 'Joylashuvni ko\'rish' : 'Посмотреть локацию'}</a>\n`;
+        }
         orderSummary += `<b>💳 ${isUz ? 'To\'lov' : 'Оплата'}:</b> ${paymentMethod === 'cash' ? (isUz ? 'Naqd' : 'Наличные') : (isUz ? 'Karta' : 'Карта')}\n\n`;
         
         orderSummary += `<b>📦 ${isUz ? 'Mahsulotlar' : 'Продукты'}:</b>\n`;
