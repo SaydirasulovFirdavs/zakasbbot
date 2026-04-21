@@ -29,3 +29,4 @@ yarn-error.log*
 client/dist/
 bot/node_modules/
 client/node_modules/
+cloudflared.exe
