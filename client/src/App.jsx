@@ -573,7 +573,10 @@ function App() {
 
       <main style={{ paddingBottom: '120px' }}>
         {categories.filter(c => activeCategory === 'all' || c.id === activeCategory).map(cat => {
-          const catProducts = PRODUCTS.filter(p => p.category === cat.id && (p.name_uz.toLowerCase().includes(searchQuery.toLowerCase()) || p.name_ru.toLowerCase().includes(searchQuery.toLowerCase())));
+          const catProducts = products.filter(p => p.category === cat.id && (
+            (p.name_uz?.toLowerCase() || '').includes(searchQuery.toLowerCase()) || 
+            (p.name_ru?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+          ));
           if (catProducts.length === 0) return null;
 
           return (
