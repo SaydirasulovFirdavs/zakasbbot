@@ -132,9 +132,41 @@ function AdminDashboard({ t, lang, onBack, products, categories, stats, orders, 
       if (res.ok) {
         setIsAddingCat(false);
         setNewCat({ id: '', uz: '', ru: '' });
-        fetchData();
+        await fetchData(true); // Parent update
+        alert("Kategoriya qo'shildi! ✅");
       }
     } catch (err) { alert(err.message); }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    if (!newProduct.name_uz || !newProduct.price || !newProduct.image) {
+      alert("Iltimos, nomi, narxi va rasmini kiriting!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/admin/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setIsAdding(false);
+        setNewProduct({ 
+          name_uz: '', name_ru: '', price: '', 
+          category: categories[0]?.id || 'bread', 
+          image: '', desc_uz: '', desc_ru: '' 
+        });
+        await fetchData(true); // Parent update
+        alert("Mahsulot muvaffaqiyatli qo'shildi! ✅");
+      } else {
+        alert("Server xatosi: " + (result.error || "Noma'lum xatolik"));
+      }
+    } catch (err) {
+      alert("Aloqa xatosi: " + err.message);
+    }
   };
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', fontWeight: '700' }}>{t.admin.loading}</div>;
@@ -320,8 +352,8 @@ function App() {
   const FREE_DELIVERY_THRESHOLD = 50000;
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [sRes, oRes, uRes, pRes, cRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/stats`),
@@ -339,7 +371,7 @@ function App() {
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -482,7 +514,16 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <div className="brand">
+        <div className="brand" onClick={() => {
+          const adminIds = [8793808077, 12345678, 6214470213];
+          if (webapp?.initDataUnsafe?.user && adminIds.includes(webapp.initDataUnsafe.user.id)) {
+            setIsAdmin(true);
+            webapp?.HapticFeedback?.impactOccurred('heavy');
+          } else if (!webapp) {
+            // For browser testing
+            setIsAdmin(true);
+          }
+        }}>
           <h1>{t.shop}</h1>
           <p>{t.daily_fresh}</p>
         </div>

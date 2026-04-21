@@ -92,16 +92,16 @@ app.post('/api/admin/products', (req, res) => {
             [name_uz, name_ru, price, category, image, desc_uz, desc_ru, id],
             (err) => {
                 if (err) return res.status(500).json({ error: err.message });
-                res.json({ success: true });
+                res.json({ success: true, message: 'Yangilandi' });
             }
         );
     } else {
         db.run(
             `INSERT INTO products (name_uz, name_ru, price, category, image, desc_uz, desc_ru) VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [name_uz, name_ru, price, category, image, desc_uz, desc_ru],
-            (err) => {
+            function(err) {
                 if (err) return res.status(500).json({ error: err.message });
-                res.json({ success: true });
+                res.json({ success: true, id: this.lastID, message: 'Qo\'shildi' });
             }
         );
     }
@@ -122,7 +122,7 @@ app.post('/api/admin/categories', (req, res) => {
         [id, uz, ru],
         (err) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ success: true });
+            res.json({ success: true, message: 'Kategoriya qo\'shildi' });
         }
     );
 });
