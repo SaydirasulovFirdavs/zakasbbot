@@ -100,10 +100,112 @@ function MapSelector({ onLocationSelect, initialLocation, t, lang }) {
   );
 }
 
+// Admin Dashboard Component
+function AdminDashboard({ t, lang, onBack }) {
+  const [stats, setStats] = useState({ totalUsers: 0, totalOrders: 0, totalRevenue: 0 });
+  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [activeTab, setActiveTab] = useState('stats');
+  const [loading, setLoading] = useState(true);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [sRes, oRes, uRes, pRes] = await Promise.all([
+          fetch(`${API_URL}/api/admin/stats`),
+          fetch(`${API_URL}/api/admin/orders`),
+          fetch(`${API_URL}/api/admin/users`),
+          fetch(`${API_URL}/api/products`)
+        ]);
+        setStats(await sRes.json());
+        setOrders(await oRes.json());
+        setUsers(await uRes.json());
+        setProducts(await pRes.json());
+      } catch (err) {
+        console.error("Admin fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Yuklanmoqda...</div>;
+
+  return (
+    <div style={{ background: '#f8f9fa', minHeight: '100vh', padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ fontWeight: '900', fontSize: '28px' }}>Dashboard</h2>
+        <button onClick={onBack} className="btn-secondary-light" style={{ width: 'auto', padding: '10px 20px' }}>Chiqish</button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Users</p>
+          <p style={{ fontSize: '20px', fontWeight: '800' }}>{stats.totalUsers}</p>
+        </div>
+        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Orders</p>
+          <p style={{ fontSize: '20px', fontWeight: '800' }}>{stats.totalOrders}</p>
+        </div>
+        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Revenue</p>
+          <p style={{ fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{stats.totalRevenue.toLocaleString()}</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '8px' }}>
+        <button onClick={() => setActiveTab('stats')} className={`cat-chip ${activeTab === 'stats' ? 'active' : ''}`}>Orders</button>
+        <button onClick={() => setActiveTab('products')} className={`cat-chip ${activeTab === 'products' ? 'active' : ''}`}>Menu</button>
+        <button onClick={() => setActiveTab('users')} className={`cat-chip ${activeTab === 'users' ? 'active' : ''}`}>Users</button>
+      </div>
+
+      {activeTab === 'stats' && (
+        <div>
+          {orders.map(order => (
+            <div key={order.id} style={{ background: 'white', padding: '16px', borderRadius: '20px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '700' }}>#{order.id} - {order.user_name}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(order.created_at).toLocaleTimeString()}</span>
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>{order.user_phone} | {order.user_address}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{order.total_price.toLocaleString()} so'm</span>
+                <span style={{ fontSize: '11px', background: '#e6fff0', color: '#065f46', padding: '4px 10px', borderRadius: '12px', fontWeight: '700' }}>{order.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'products' && (
+        <div>
+          <button className="btn-primary" style={{ marginBottom: '16px' }}>+ Yangi qo'shish</button>
+          {products.map(p => (
+            <div key={p.id} style={{ display: 'flex', gap: '12px', background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '10px' }}>
+              <img src={p.image} style={{ width: '50px', height: '50px', borderRadius: '10px', objectFit: 'cover' }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: '700', fontSize: '14px' }}>{p[`name_${lang}`]}</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.price.toLocaleString()} so'm</p>
+              </div>
+              <button className="qty-btn-mini"><Plus size={16} /></button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [lang, setLang] = useState(localStorage.getItem('lang') || 'uz');
   const t = translations[lang];
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [products, setProducts] = useState(PRODUCTS); // Fallback to static until loaded
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -135,7 +237,28 @@ function App() {
       wa.ready();
       wa.expand();
       setWebapp(wa);
+      
+      // Secret Admin Access: If username is your admin username or ID
+      // For now, let's add a long press or specific user ID
+      const adminIds = [8793808077, 12345678]; // Add your Telegram ID here
+      if (wa.initDataUnsafe?.user && adminIds.includes(wa.initDataUnsafe.user.id)) {
+        // Option to switch to admin
+      }
     }
+
+    const fetchProducts = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const res = await fetch(`${API_URL}/api/products`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) setProducts(data);
+        }
+      } catch (err) {
+        console.error("Products fetch error:", err);
+      }
+    };
+    fetchProducts();
   }, []);
 
   useEffect(() => {
@@ -169,15 +292,15 @@ function App() {
   };
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(p => {
+    return products.filter(p => {
       const matchesCat = activeCategory === 'all' || p.category === activeCategory;
       const matchesSearch = 
-        p[`name_${lang}`].toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.name_uz.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.name_ru.toLowerCase().includes(searchQuery.toLowerCase());
+        (p[`name_${lang}`] || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.name_uz || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.name_ru || '').toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCat && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, products, lang]);
 
   const getItemQty = (id) => cart.find(i => i.id === id)?.quantity || 0;
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -242,6 +365,10 @@ function App() {
         <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>{t.cart.thanks}</p>
       </div>
     );
+  }
+
+  if (isAdmin) {
+    return <AdminDashboard t={t} lang={lang} onBack={() => setIsAdmin(false)} />;
   }
 
   return (
@@ -411,7 +538,7 @@ function App() {
                   <div style={{ marginBottom: '32px' }}>
                     <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '16px' }}>{t.cart.need_more}</h4>
                     <div className="scroll-hide" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px' }}>
-                      {PRODUCTS.filter(p => !cart.find(ci => ci.id === p.id)).slice(0, 5).map(p => (
+                      {products.filter(p => !cart.find(ci => ci.id === p.id)).slice(0, 5).map(p => (
                         <div key={p.id} className="rec-item" onClick={() => addToCart(p)}>
                           <img src={p.image} className="rec-img" alt={p[`name_${lang}`]} />
                           <p className="rec-name">{p[`name_${lang}`]}</p>
@@ -529,6 +656,13 @@ function App() {
                   <span style={{ fontSize: '13px', fontWeight: '600', opacity: 0.9 }}>{t.profile.cashback}</span>
                 </div>
                 <p style={{ fontSize: '28px', fontWeight: '900' }}>{cashbackBalance.toLocaleString()} <span style={{ fontSize: '16px', fontWeight: '600' }}>so'm</span></p>
+              </div>
+
+              {/* Secret Admin Button */}
+              <div style={{ padding: '0 0 24px' }}>
+                <button onClick={() => setIsAdmin(true)} style={{ width: '100%', background: '#f0f0f0', border: '1.5px dashed #ccc', padding: '12px', borderRadius: '16px', fontSize: '13px', color: '#666', fontWeight: '600' }}>
+                  📊 Admin Panelga kirish
+                </button>
               </div>
 
               <div style={{ background: 'white', padding: '24px', borderRadius: '28px', marginBottom: '24px' }}>

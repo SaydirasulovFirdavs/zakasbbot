@@ -4,9 +4,17 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const { db, initDb } = require('./database');
 
 const bot = new Telegraf(process.env.MY_NEW_BOT_TOKEN || '');
 const app = express();
+
+// Initialize Database
+initDb().then(() => {
+    console.log('📦 Database initialized and ready');
+}).catch(err => {
+    console.error('❌ Database initialization error:', err);
+});
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -37,13 +45,85 @@ function validateTelegramData(initData, botToken) {
     return calculatedHash === hash;
 }
 
+// Public: Get all products
+app.get('/api/products', (req, res) => {
+    db.all(`SELECT * FROM products WHERE is_active = 1`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// Admin: Get statistics
+app.get('/api/admin/stats', (req, res) => {
+    const stats = {};
+    db.get(`SELECT COUNT(*) as count FROM users`, (err, row) => {
+        stats.totalUsers = row.count;
+        db.get(`SELECT COUNT(*) as count, SUM(total_price) as total FROM orders`, (err, row) => {
+            stats.totalOrders = row.count;
+            stats.totalRevenue = row.total || 0;
+            res.json(stats);
+        });
+    });
+});
+
+// Admin: Get all orders
+app.get('/api/admin/orders', (req, res) => {
+    db.all(`SELECT * FROM orders ORDER BY created_at DESC`, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// Admin: Get all users
+app.get('/api/admin/users', (req, res) => {
+    db.all(`SELECT * FROM users ORDER BY created_at DESC`, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// Admin: Add/Update Product
+app.post('/api/admin/products', (req, res) => {
+    const { id, name_uz, name_ru, price, category, image, desc_uz, desc_ru } = req.body;
+    if (id) {
+        // Update
+        db.run(
+            `UPDATE products SET name_uz=?, name_ru=?, price=?, category=?, image=?, desc_uz=?, desc_ru=? WHERE id=?`,
+            [name_uz, name_ru, price, category, image, desc_uz, desc_ru, id],
+            (err) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ success: true });
+            }
+        );
+    } else {
+        // Create
+        db.run(
+            `INSERT INTO products (name_uz, name_ru, price, category, image, desc_uz, desc_ru) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [name_uz, name_ru, price, category, image, desc_uz, desc_ru],
+            (err) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ success: true });
+            }
+        );
+    }
+});
+
 // Health Check
 app.get('/', (req, res) => {
     res.send('Bakery Bot API is running! 🥖');
 });
 
-bot.start((ctx) => {
+bot.start(async (ctx) => {
     console.log(`Received /start from ${ctx.from.id}`);
+    
+    // Save user to DB
+    const { id, first_name, last_name, username } = ctx.from;
+    db.run(
+        `INSERT OR REPLACE INTO users (telegram_id, first_name, last_name, username) VALUES (?, ?, ?, ?)`,
+        [id, first_name, last_name, username],
+        (err) => { if (err) console.error('User save error:', err); }
+    );
+
     try {
         ctx.replyWithHTML(
             `<b>Xush kelibsiz, ${ctx.from.first_name}!</b> 🍰☕️\n\n` +
@@ -71,6 +151,17 @@ app.post('/api/order', async (req, res) => {
         const urlParams = new URLSearchParams(initData);
         const userData = JSON.parse(urlParams.get('user'));
         const chat_id = userData.id;
+
+        // Save order to DB
+        db.run(
+            `INSERT INTO orders (user_id, user_name, user_phone, user_address, total_price, discount, payment_method, items) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [chat_id, user.name, user.phone, user.address, totalPrice, discount, payment_method, JSON.stringify(items)],
+            function(err) {
+                if (err) console.error('Order DB save error:', err);
+                else console.log('Order saved to DB with ID:', this.lastID);
+            }
+        );
 
         const isUz = lang === 'uz';
         
