@@ -102,6 +102,8 @@ function MapSelector({ onLocationSelect, initialLocation, t, lang }) {
 
 // Admin Dashboard Component
 function AdminDashboard({ t, lang, onBack }) {
+  const [stats, setStats] = useState({ totalUsers: 0, totalOrders: 0, totalRevenue: 0 });
+  const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
