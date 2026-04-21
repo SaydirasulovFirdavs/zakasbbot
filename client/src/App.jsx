@@ -156,103 +156,120 @@ function AdminDashboard({ t, lang, onBack }) {
     }
   };
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Yuklanmoqda...</div>;
+  if (loading) return <div style={{ padding: '40px', textAlign: 'center', fontWeight: '700' }}>{t.admin.loading}</div>;
 
   return (
-    <div style={{ background: '#f8f9fa', minHeight: '100vh', padding: '20px' }}>
+    <div style={{ background: '#fdfaf7', minHeight: '100vh', padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ fontWeight: '900', fontSize: '28px' }}>Dashboard</h2>
-        <button onClick={onBack} className="btn-secondary-light" style={{ width: 'auto', padding: '10px 20px' }}>Chiqish</button>
+        <h2 style={{ fontWeight: '900', fontSize: '26px', color: 'var(--primary)' }}>{t.admin.dashboard}</h2>
+        <button onClick={onBack} className="lang-btn" style={{ background: 'white', color: 'var(--primary)', borderColor: 'var(--primary)' }}>
+          {t.admin.exit}
+        </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Users</p>
-          <p style={{ fontSize: '20px', fontWeight: '800' }}>{stats.totalUsers}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '24px' }}>
+        <div style={{ background: 'white', padding: '14px', borderRadius: '20px', textAlign: 'center', boxShadow: 'var(--shadow-soft)' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{t.admin.users}</p>
+          <p style={{ fontSize: '18px', fontWeight: '800' }}>{stats.totalUsers}</p>
         </div>
-        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Orders</p>
-          <p style={{ fontSize: '20px', fontWeight: '800' }}>{stats.totalOrders}</p>
+        <div style={{ background: 'white', padding: '14px', borderRadius: '20px', textAlign: 'center', boxShadow: 'var(--shadow-soft)' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{t.admin.stats}</p>
+          <p style={{ fontSize: '18px', fontWeight: '800' }}>{stats.totalOrders}</p>
         </div>
-        <div style={{ background: 'white', padding: '16px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Revenue</p>
-          <p style={{ fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{stats.totalRevenue.toLocaleString()}</p>
+        <div style={{ background: 'white', padding: '14px', borderRadius: '20px', textAlign: 'center', boxShadow: 'var(--shadow-soft)' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{t.admin.revenue}</p>
+          <p style={{ fontSize: '14px', fontWeight: '900', color: '#10b981' }}>{stats.totalRevenue?.toLocaleString()}</p>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '8px' }}>
-        <button onClick={() => setActiveTab('stats')} className={`cat-chip ${activeTab === 'stats' ? 'active' : ''}`}>Orders</button>
-        <button onClick={() => setActiveTab('products')} className={`cat-chip ${activeTab === 'products' ? 'active' : ''}`}>Menu</button>
-        <button onClick={() => setActiveTab('users')} className={`cat-chip ${activeTab === 'users' ? 'active' : ''}`}>Users</button>
+        <button onClick={() => setActiveTab('stats')} className={`cat-chip ${activeTab === 'stats' ? 'active' : ''}`}>{t.admin.stats}</button>
+        <button onClick={() => setActiveTab('products')} className={`cat-chip ${activeTab === 'products' ? 'active' : ''}`}>{t.admin.menu}</button>
+        <button onClick={() => setActiveTab('users')} className={`cat-chip ${activeTab === 'users' ? 'active' : ''}`}>{t.admin.users}</button>
       </div>
 
       {activeTab === 'stats' && (
-        <div>
-          {orders.map(order => (
-            <div key={order.id} style={{ background: 'white', padding: '16px', borderRadius: '20px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          {orders.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Hozircha buyurtmalar yo'q</p> : 
+          orders.map(order => (
+            <div key={order.id} style={{ background: 'white', padding: '16px', borderRadius: '24px', marginBottom: '12px', boxShadow: 'var(--shadow-soft)', border: '1px solid rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontWeight: '700' }}>#{order.id} - {order.user_name}</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(order.created_at).toLocaleTimeString()}</span>
+                <span style={{ fontWeight: '800', fontSize: '15px' }}>#{order.id} — {order.user_name}</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>{order.user_phone} | {order.user_address}</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '10px' }}>{order.user_phone} | {order.user_address}</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{order.total_price.toLocaleString()} so'm</span>
-                <span style={{ fontSize: '11px', background: '#e6fff0', color: '#065f46', padding: '4px 10px', borderRadius: '12px', fontWeight: '700' }}>{order.status}</span>
+                <span style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '16px' }}>{order.total_price?.toLocaleString()} so'm</span>
+                <span style={{ fontSize: '10px', background: '#e6fff0', color: '#065f46', padding: '6px 12px', borderRadius: '14px', fontWeight: '800', textTransform: 'uppercase' }}>{order.status}</span>
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {activeTab === 'products' && (
-        <div>
-          <button onClick={() => setIsAdding(!isAdding)} className="btn-primary" style={{ marginBottom: '16px' }}>
-            {isAdding ? 'Bekor qilish' : '+ Yangi qo\'shish'}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <button 
+            onClick={() => setIsAdding(!isAdding)} 
+            className="btn-yandex" 
+            style={{ marginBottom: '20px', background: isAdding ? '#f5f0ed' : '#ffcc00', color: isAdding ? 'var(--text-main)' : 'black' }}
+          >
+            {isAdding ? t.admin.cancel : t.admin.add_new}
           </button>
 
-          {isAdding && (
-            <div style={{ background: 'white', padding: '20px', borderRadius: '24px', marginBottom: '24px', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }}>
-              <h4 style={{ marginBottom: '16px' }}>Yangi mahsulot</h4>
-              <div className="form-group"><input className="form-input" placeholder="Nomi (UZ)" value={newProduct.name_uz} onChange={e => setNewProduct({...newProduct, name_uz: e.target.value})} /></div>
-              <div className="form-group"><input className="form-input" placeholder="Nomi (RU)" value={newProduct.name_ru} onChange={e => setNewProduct({...newProduct, name_ru: e.target.value})} /></div>
-              <div className="form-group"><input className="form-input" type="number" placeholder="Narxi" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseInt(e.target.value)})} /></div>
-              <div className="form-group"><input className="form-input" placeholder="Rasm linki (URL)" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} /></div>
-              <div className="form-group">
-                <select className="form-input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
-                  <option value="bread">Non</option>
-                  <option value="sweets">Shirinlik</option>
-                  <option value="bogirsoq">Bo'g'irsoq</option>
-                </select>
-              </div>
-              <button onClick={handleAddProduct} className="btn-yandex">Saqlash</button>
-            </div>
-          )}
+          <AnimatePresence>
+            {isAdding && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{ background: 'white', padding: '24px', borderRadius: '28px', marginBottom: '24px', boxShadow: 'var(--shadow-premium)' }}>
+                  <h4 style={{ marginBottom: '20px', fontWeight: '800' }}>{t.admin.add_new}</h4>
+                  <div className="form-group"><label>{t.admin.name_uz}</label><input className="form-input" placeholder="Somsa..." value={newProduct.name_uz} onChange={e => setNewProduct({...newProduct, name_uz: e.target.value})} /></div>
+                  <div className="form-group"><label>{t.admin.name_ru}</label><input className="form-input" placeholder="Самса..." value={newProduct.name_ru} onChange={e => setNewProduct({...newProduct, name_ru: e.target.value})} /></div>
+                  <div className="form-group"><label>{t.admin.price}</label><input className="form-input" type="number" placeholder="8000" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseInt(e.target.value)})} /></div>
+                  <div className="form-group"><label>{t.admin.image_url}</label><input className="form-input" placeholder="https://..." value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} /></div>
+                  <div className="form-group">
+                    <label>{t.admin.category}</label>
+                    <select className="form-input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
+                      <option value="bread">{t.categories.bread}</option>
+                      <option value="sweets">{t.categories.sweets}</option>
+                      <option value="bogirsoq">{t.categories.bogirsoq}</option>
+                    </select>
+                  </div>
+                  <button onClick={handleAddProduct} className="btn-yandex" style={{ marginTop: '10px' }}>{t.admin.save}</button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {products.map(p => (
-            <div key={p.id} style={{ display: 'flex', gap: '12px', background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '10px' }}>
-              <img src={p.image} style={{ width: '50px', height: '50px', borderRadius: '10px', objectFit: 'cover' }} onError={e => e.target.src='https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400'} />
+            <div key={p.id} style={{ display: 'flex', gap: '14px', background: 'white', padding: '14px', borderRadius: '20px', marginBottom: '12px', boxShadow: 'var(--shadow-soft)', alignItems: 'center' }}>
+              <img src={p.image} style={{ width: '56px', height: '56px', borderRadius: '14px', objectFit: 'cover' }} onError={e => e.target.src='https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400'} />
               <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: '700', fontSize: '14px' }}>{p[`name_${lang}`]}</p>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.price?.toLocaleString()} so'm</p>
+                <p style={{ fontWeight: '800', fontSize: '15px' }}>{p[`name_${lang}`]}</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>{p.price?.toLocaleString()} so'm</p>
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {activeTab === 'users' && (
-        <div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           {users.map(u => (
-            <div key={u.telegram_id} style={{ background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{u.first_name[0]}</div>
+            <div key={u.telegram_id} style={{ background: 'white', padding: '16px', borderRadius: '24px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: 'var(--shadow-soft)' }}>
+              <div style={{ width: '44px', height: '44px', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800', fontSize: '18px' }}>{u.first_name[0]}</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: '700', fontSize: '14px' }}>{u.first_name} {u.last_name || ''}</p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>@{u.username || 'n/a'}</p>
+                <p style={{ fontWeight: '800', fontSize: '15px' }}>{u.first_name} {u.last_name || ''}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>@{u.username || 'n/a'}</p>
               </div>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(u.created_at).toLocaleDateString()}</span>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{new Date(u.created_at).toLocaleDateString()}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -739,7 +756,7 @@ function App() {
                 </div>
               </div>
 
-              <button className="btn-primary" onClick={() => setIsProfileOpen(false)}>
+                  <button className="btn-yandex" onClick={() => setIsProfileOpen(false)}>
                 {t.profile.save}
               </button>
             </motion.div>

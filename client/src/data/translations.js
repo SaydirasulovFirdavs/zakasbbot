@@ -46,6 +46,24 @@ export const translations = {
       personal_info: "Shaxsiy ma'lumotlar",
       save: "Saqlash",
       logout: "Chiqish"
+    },
+    admin: {
+      dashboard: "Boshqaruv paneli",
+      stats: "Statistika",
+      menu: "Menyu",
+      users: "Foydalanuvchilar",
+      revenue: "Tushum",
+      add_new: "+ Yangi qo'shish",
+      cancel: "Bekor qilish",
+      save: "Saqlash",
+      name_uz: "Nomi (UZ)",
+      name_ru: "Nomi (RU)",
+      price: "Narxi",
+      image_url: "Rasm havolasi (URL)",
+      category: "Kategoriya",
+      success_add: "Mahsulot qo'shildi!",
+      exit: "Chiqish",
+      loading: "Yuklanmoqda..."
     }
   },
   ru: {
@@ -95,6 +113,24 @@ export const translations = {
       personal_info: "Личные данные",
       save: "Сохранить",
       logout: "Выйти"
+    },
+    admin: {
+      dashboard: "Панель управления",
+      stats: "Статистика",
+      menu: "Меню",
+      users: "Пользователи",
+      revenue: "Выручка",
+      add_new: "+ Добавить новый",
+      cancel: "Отмена",
+      save: "Сохранить",
+      name_uz: "Название (UZ)",
+      name_ru: "Название (RU)",
+      price: "Цена",
+      image_url: "Ссылка на фото (URL)",
+      category: "Категория",
+      success_add: "Продукт добавлен!",
+      exit: "Выйти",
+      loading: "Загрузка..."
     }
   }
 };
