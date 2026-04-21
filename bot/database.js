@@ -73,7 +73,7 @@ const initDb = () => {
                     if (!err && row.count === 0) {
                         const initialCats = [
                             ['all', 'Hammasi', 'Все'],
-                            ['bogirsoq', 'Bo\'g'irsoq', 'Богирсок'],
+                            ['bogirsoq', "Bo'g'irsoq", 'Богирсок'],
                             ['sweets', 'Shirinliklar', 'Сладости'],
                             ['bread', 'Non', 'Хлеб']
                         ];
