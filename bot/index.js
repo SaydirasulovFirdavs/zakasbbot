@@ -17,7 +17,8 @@ initDb().then(() => {
 });
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 const WEB_APP_URL = process.env.WEB_APP_URL || 'http://localhost:5173';
 
@@ -86,7 +87,6 @@ app.get('/api/admin/users', (req, res) => {
 app.post('/api/admin/products', (req, res) => {
     const { id, name_uz, name_ru, price, category, image, desc_uz, desc_ru } = req.body;
     if (id) {
-        // Update
         db.run(
             `UPDATE products SET name_uz=?, name_ru=?, price=?, category=?, image=?, desc_uz=?, desc_ru=? WHERE id=?`,
             [name_uz, name_ru, price, category, image, desc_uz, desc_ru, id],
@@ -96,7 +96,6 @@ app.post('/api/admin/products', (req, res) => {
             }
         );
     } else {
-        // Create
         db.run(
             `INSERT INTO products (name_uz, name_ru, price, category, image, desc_uz, desc_ru) VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [name_uz, name_ru, price, category, image, desc_uz, desc_ru],
@@ -106,6 +105,26 @@ app.post('/api/admin/products', (req, res) => {
             }
         );
     }
+});
+
+// Categories API
+app.get('/api/categories', (req, res) => {
+    db.all(`SELECT * FROM categories`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/admin/categories', (req, res) => {
+    const { id, uz, ru } = req.body;
+    db.run(
+        `INSERT INTO categories (id, uz, ru) VALUES (?, ?, ?)`,
+        [id, uz, ru],
+        (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true });
+        }
+    );
 });
 
 // Health Check

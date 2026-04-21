@@ -102,13 +102,14 @@ function MapSelector({ onLocationSelect, initialLocation, t, lang }) {
 
 // Admin Dashboard Component
 function AdminDashboard({ t, lang, onBack }) {
-  const [stats, setStats] = useState({ totalUsers: 0, totalOrders: 0, totalRevenue: 0 });
-  const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState('stats');
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [isAddingCat, setIsAddingCat] = useState(false);
+  const [newCat, setNewCat] = useState({ id: '', uz: '', ru: '' });
   const [newProduct, setNewProduct] = useState({ name_uz: '', name_ru: '', price: '', category: 'bread', image: '', desc_uz: '', desc_ru: '' });
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -116,21 +117,50 @@ function AdminDashboard({ t, lang, onBack }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [sRes, oRes, uRes, pRes] = await Promise.all([
+      const [sRes, oRes, uRes, pRes, cRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/stats`),
         fetch(`${API_URL}/api/admin/orders`),
         fetch(`${API_URL}/api/admin/users`),
-        fetch(`${API_URL}/api/products`)
+        fetch(`${API_URL}/api/products`),
+        fetch(`${API_URL}/api/categories`)
       ]);
       setStats(await sRes.json());
       setOrders(await oRes.json());
       setUsers(await uRes.json());
       setProducts(await pRes.json());
+      setCategories(await cRes.json());
     } catch (err) {
       console.error("Admin fetch error:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProduct({ ...newProduct, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCat.id || !newCat.uz) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCat)
+      });
+      if (res.ok) {
+        setIsAddingCat(false);
+        setNewCat({ id: '', uz: '', ru: '' });
+        fetchData();
+      }
+    } catch (err) { alert(err.message); }
   };
 
   useEffect(() => {
@@ -230,15 +260,38 @@ function AdminDashboard({ t, lang, onBack }) {
                   <div className="form-group"><label>{t.admin.name_uz}</label><input className="form-input" placeholder="Somsa..." value={newProduct.name_uz} onChange={e => setNewProduct({...newProduct, name_uz: e.target.value})} /></div>
                   <div className="form-group"><label>{t.admin.name_ru}</label><input className="form-input" placeholder="Самса..." value={newProduct.name_ru} onChange={e => setNewProduct({...newProduct, name_ru: e.target.value})} /></div>
                   <div className="form-group"><label>{t.admin.price}</label><input className="form-input" type="number" placeholder="8000" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: parseInt(e.target.value)})} /></div>
-                  <div className="form-group"><label>{t.admin.image_url}</label><input className="form-input" placeholder="https://..." value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} /></div>
+                  
+                  <div className="form-group">
+                    <label>{t.admin.image_url} (Galereyadan tanlang)</label>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="file-upload" />
+                      <label htmlFor="file-upload" className="cat-chip" style={{ background: '#f5f0ed', cursor: 'pointer', margin: 0 }}>📸 Rasm tanlash</label>
+                      {newProduct.image && <img src={newProduct.image} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />}
+                    </div>
+                  </div>
+
                   <div className="form-group">
                     <label>{t.admin.category}</label>
-                    <select className="form-input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
-                      <option value="bread">{t.categories.bread}</option>
-                      <option value="sweets">{t.categories.sweets}</option>
-                      <option value="bogirsoq">{t.categories.bogirsoq}</option>
-                    </select>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <select className="form-input" style={{ flex: 1 }} value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
+                        {categories.filter(c => c.id !== 'all').map(c => (
+                          <option key={c.id} value={c.id}>{lang === 'uz' ? c.uz : c.ru}</option>
+                        ))}
+                      </select>
+                      <button onClick={() => setIsAddingCat(!isAddingCat)} className="qty-btn-mini" style={{ width: '48px', height: '48px', background: 'var(--bg-canvas)' }}>+</button>
+                    </div>
                   </div>
+
+                  {isAddingCat && (
+                    <div style={{ background: '#fdfaf7', padding: '16px', borderRadius: '20px', marginBottom: '16px', border: '1px dashed #ccc' }}>
+                      <p style={{ fontSize: '12px', fontWeight: '700', marginBottom: '10px' }}>Yangi kategoriya</p>
+                      <input className="form-input" style={{ marginBottom: '8px' }} placeholder="ID (masalan: drinks)" value={newCat.id} onChange={e => setNewCat({...newCat, id: e.target.value})} />
+                      <input className="form-input" style={{ marginBottom: '8px' }} placeholder="Nomi UZ" value={newCat.uz} onChange={e => setNewCat({...newCat, uz: e.target.value})} />
+                      <input className="form-input" style={{ marginBottom: '12px' }} placeholder="Nomi RU" value={newCat.ru} onChange={e => setNewCat({...newCat, ru: e.target.value})} />
+                      <button onClick={handleAddCategory} className="btn-primary" style={{ padding: '10px' }}>Kategoriyani saqlash</button>
+                    </div>
+                  )}
+
                   <button onClick={handleAddProduct} className="btn-yandex" style={{ marginTop: '10px' }}>{t.admin.save}</button>
                 </div>
               </motion.div>
@@ -280,7 +333,8 @@ function App() {
   const t = translations[lang];
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [products, setProducts] = useState(PRODUCTS); // Fallback to static until loaded
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -315,25 +369,26 @@ function App() {
       
       // Secret Admin Access: If username is your admin username or ID
       // For now, let's add a long press or specific user ID
-      const adminIds = [8793808077, 12345678]; // Add your Telegram ID here
+      const adminIds = [8793808077, 12345678, 6214470213]; // Add your Telegram ID here
       if (wa.initDataUnsafe?.user && adminIds.includes(wa.initDataUnsafe.user.id)) {
         // Option to switch to admin
       }
     }
 
-    const fetchProducts = async () => {
+    const fetchInitialData = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${API_URL}/api/products`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.length > 0) setProducts(data);
-        }
+        const [pRes, cRes] = await Promise.all([
+          fetch(`${API_URL}/api/products`),
+          fetch(`${API_URL}/api/categories`)
+        ]);
+        if (pRes.ok) setProducts(await pRes.json());
+        if (cRes.ok) setCategories(await cRes.json());
       } catch (err) {
-        console.error("Products fetch error:", err);
+        console.error("Initial fetch error:", err);
       }
     };
-    fetchProducts();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
@@ -486,7 +541,7 @@ function App() {
 
       <nav className="categories-nav">
         <div className="categories-scroll">
-          {CATEGORIES.map(cat => (
+          {categories.map(cat => (
             <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`cat-chip ${activeCategory === cat.id ? 'active' : ''}`}>
               {cat[lang]}
             </button>
@@ -495,7 +550,7 @@ function App() {
       </nav>
 
       <main style={{ paddingBottom: '120px' }}>
-        {CATEGORIES.filter(c => activeCategory === 'all' || c.id === activeCategory).map(cat => {
+        {categories.filter(c => activeCategory === 'all' || c.id === activeCategory).map(cat => {
           const catProducts = PRODUCTS.filter(p => p.category === cat.id && (p.name_uz.toLowerCase().includes(searchQuery.toLowerCase()) || p.name_ru.toLowerCase().includes(searchQuery.toLowerCase())));
           if (catProducts.length === 0) return null;
 

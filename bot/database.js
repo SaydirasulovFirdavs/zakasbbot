@@ -20,6 +20,13 @@ const initDb = () => {
                 is_active INTEGER DEFAULT 1
             )`);
 
+            // Categories Table
+            db.run(`CREATE TABLE IF NOT EXISTS categories (
+                id TEXT PRIMARY KEY,
+                uz TEXT,
+                ru TEXT
+            )`);
+
             // Orders Table
             db.run(`CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +64,21 @@ const initDb = () => {
                         ];
                         const stmt = db.prepare(`INSERT INTO products (name_uz, name_ru, price, category, image, desc_uz, desc_ru) VALUES (?, ?, ?, ?, ?, ?, ?)`);
                         initialProducts.forEach(p => stmt.run(p));
+                        stmt.finalize();
+                    }
+                });
+
+                // Seed initial categories if empty
+                db.get(`SELECT COUNT(*) as count FROM categories`, (err, row) => {
+                    if (!err && row.count === 0) {
+                        const initialCats = [
+                            ['all', 'Hammasi', 'Все'],
+                            ['bogirsoq', 'Bo\'g'irsoq', 'Богирсок'],
+                            ['sweets', 'Shirinliklar', 'Сладости'],
+                            ['bread', 'Non', 'Хлеб']
+                        ];
+                        const stmt = db.prepare(`INSERT INTO categories (id, uz, ru) VALUES (?, ?, ?)`);
+                        initialCats.forEach(c => stmt.run(c));
                         stmt.finalize();
                     }
                     resolve();
