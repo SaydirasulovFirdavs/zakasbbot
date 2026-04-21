@@ -181,20 +181,30 @@ function AdminDashboard({ t, lang, onBack }) {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    if (!newProduct.name_uz || !newProduct.price || !newProduct.image) {
+      alert("Iltimos, nomi, narxi va rasmini kiriting!");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/admin/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProduct)
       });
+      
+      const result = await res.json();
+      
       if (res.ok) {
         setIsAdding(false);
-        setNewProduct({ name_uz: '', name_ru: '', price: '', category: 'bread', image: '', desc_uz: '', desc_ru: '' });
+        setNewProduct({ name_uz: '', name_ru: '', price: '', category: categories[0]?.id || 'bread', image: '', desc_uz: '', desc_ru: '' });
         fetchData();
-        alert("Mahsulot qo'shildi!");
+        alert("Mahsulot muvaffaqiyatli qo'shildi! ✅");
+      } else {
+        alert("Server xatosi: " + (result.error || "Noma'lum xatolik"));
       }
     } catch (err) {
-      alert("Xatolik: " + err.message);
+      alert("Aloqa xatosi: " + err.message);
     }
   };
 
