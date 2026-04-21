@@ -881,11 +881,7 @@ function App() {
             <div className="modal-body">
               <h2 className="modal-title">{selectedProduct[`name_${lang}`]}</h2>
               <div className="modal-price">{selectedProduct.price.toLocaleString()} so'm</div>
-              <p className="modal-desc">{selectedProduct[`desc_${lang}`]}</p>
-              <div style={{ marginTop: '32px' }}>
-                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px' }}>{t.cart.details_title}</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{t.cart.details_desc}</p>
-              </div>
+              <p className="modal-desc">{selectedProduct[`desc_${lang}`] || (lang === 'uz' ? 'Mazali va sifatli mahsulot.' : 'Вкусный и качественный продукт.')}</p>
             </div>
             <div className="modal-footer">
               <div className="qty-control" style={{ background: '#f5f0ed', padding: '8px', borderRadius: '18px', height: '56px', flex: 1 }}>
