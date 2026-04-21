@@ -1,12 +1,14 @@
 require('dotenv').config();
+console.log('--- SYSTEM STARTING ---');
+console.log('Check MY_NEW_BOT_TOKEN:', process.env.MY_NEW_BOT_TOKEN ? 'FOUND' : 'NOT FOUND');
 const { Telegraf, Markup } = require('telegraf');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
-const bot = new Telegraf(process.env.BOT_TOKEN || '');
-console.log('DEBUG: Full Token used:', process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.MY_NEW_BOT_TOKEN || '');
+console.log('DEBUG: Full Token used:', process.env.MY_NEW_BOT_TOKEN);
 const app = express();
 
 app.use(cors());
@@ -64,7 +66,7 @@ app.post('/api/order', async (req, res) => {
         const { items, subTotal, discount, totalPrice, paymentMethod, user, initData, lang } = req.body;
         
         // Security Check
-        if (!validateTelegramData(initData, process.env.BOT_TOKEN)) {
+        if (!validateTelegramData(initData, process.env.MY_NEW_BOT_TOKEN)) {
             console.warn('Security check failed for order');
             return res.status(403).json({ error: 'Xavfsizlik tekshiruvidan o\'tilmadi' });
         }
