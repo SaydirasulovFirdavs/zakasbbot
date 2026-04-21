@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
 const bot = new Telegraf(process.env.BOT_TOKEN || '');
+console.log('Using BOT_TOKEN starting with:', (process.env.BOT_TOKEN || '').substring(0, 10));
 const app = express();
 
 app.use(cors());
